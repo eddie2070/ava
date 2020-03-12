@@ -1,5 +1,6 @@
 .App {
   text-align: center;
+  background-color: #ff9900;
 }
 
 .App-logo {
@@ -11,6 +12,11 @@
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
   }
+}
+
+@font-face {
+    font-family: 'ember';
+    src: url('./fonts/amazon_ember/AmazonEmber_Rg.ttf');
 }
 
 .App-header {
@@ -26,6 +32,13 @@
 
 .App-link {
   color: #61dafb;
+}
+
+.Message {
+  font-family: ember;
+  color: white;
+  font-size: 65px;
+  padding: 200px;
 }
 
 @keyframes App-logo-spin {
