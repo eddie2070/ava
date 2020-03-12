@@ -1,0 +1,23 @@
+{
+  "files": {
+    "main.css": "/static/css/main.3602221a.chunk.css",
+    "main.js": "/static/js/main.28d296f8.chunk.js",
+    "main.js.map": "/static/js/main.28d296f8.chunk.js.map",
+    "runtime-main.js": "/static/js/runtime-main.55f5c344.js",
+    "runtime-main.js.map": "/static/js/runtime-main.55f5c344.js.map",
+    "static/js/2.aaf218df.chunk.js": "/static/js/2.aaf218df.chunk.js",
+    "static/js/2.aaf218df.chunk.js.map": "/static/js/2.aaf218df.chunk.js.map",
+    "index.html": "/index.html",
+    "precache-manifest.7e243721e478cafca2bcf70ff5616e9b.js": "/precache-manifest.7e243721e478cafca2bcf70ff5616e9b.js",
+    "service-worker.js": "/service-worker.js",
+    "static/css/main.3602221a.chunk.css.map": "/static/css/main.3602221a.chunk.css.map",
+    "static/js/2.aaf218df.chunk.js.LICENSE.txt": "/static/js/2.aaf218df.chunk.js.LICENSE.txt",
+    "static/media/index.css": "/static/media/AmazonEmber_Rg.76666a38.ttf"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.55f5c344.js",
+    "static/js/2.aaf218df.chunk.js",
+    "static/css/main.3602221a.chunk.css",
+    "static/js/main.28d296f8.chunk.js"
+  ]
+}
