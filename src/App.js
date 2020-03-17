@@ -9,7 +9,15 @@ import { AmazonAIPredictionsProvider } from '@aws-amplify/predictions';
 import TextLoop from "react-text-loop";
 import cxs from "cxs/component";
 
+import { Textfit } from 'react-textfit';
+
 import mic from 'microphone-stream';
+import $ from 'jquery';
+import streamAudioToWebSocket from  "./lib/main.js";
+import showError from  "./lib/main.js";
+import { startbutton } from "./lib/main.js";
+import { resetbutton } from "./lib/main.js";
+
 
 import AWS_logo from "./images/AWS_logo_RGB_WHT.png"
 
@@ -53,6 +61,7 @@ Amplify.addPluggable(new AmazonAIPredictionsProvider());
 const StyledTextLoop = cxs(TextLoop)({
   display: "block"
 });
+
 
 
 function SpeechToText(props) {
@@ -166,57 +175,68 @@ function SpeechToText(props) {
 class LCD extends React.Component {
   state = {
     datalcd: null,
-    status: 'idle'
+    status: 0,
+    startbact: ''
   }
   
   componentDidMount() {
     this.getSub()
+    
   }
     getSub = () => {
    const datalcd = Amplify.PubSub.subscribe('lcd-message').subscribe({
   next: data => {
     var answer = JSON.stringify(data);
+    console.log('answer: ', answer);
     var objectValue = JSON.parse(answer);
     var messageiot = objectValue['value'].message;
     console.log('tip: ', messageiot);
-    this.setState({datalcd: messageiot, status: 'presence'});
+    var presenceiot = objectValue['value'].presence;
+    console.log('status: ', presenceiot);
+    this.setState({datalcd: messageiot, status: presenceiot});
   },
   error: error => console.error(error),
   close: () => console.log('Done'),
 });
   }
+
   render(){
-    const {datalcd, status} = this.state;
+    const {datalcd, status, startbact} = this.state;
       const { loading } = this.state;
+    const welcome = 'How can I help?';
     return (
       <div className="App"style = {{height:"130vh", justifyContent: 'center'}}>
-      <SpeechToText />
+      <textarea id="transcript" placeholder="Real Time transcribe stream" rows="1"
+      readonly="readonly"></textarea>
 
       <div className="Message">
-      {status == "idle" ? <TextLoop interval='4000' fade='true' children={["How can I help?", "	¿Cómo puedo ayudarte?",<img src={AWS_logo} alt="Logo" />]} /> : `AVA: ${datalcd}`}
-      
+      {(status === 0) ? <TextLoop interval='4000' fade='true' children={["ASK ME", <img src={AWS_logo} alt="Logo" />]} /> : null}
+      {(status === 1) ? "How can I help?" : null }
+      {(status === "request") ? <Textfit mode="single">{datalcd}</Textfit>  : null}
        </div>
        
+        <div class="row">
+            <div class="col">
+                <button onClick={startbutton} class="button-xl" title="Start Transcription">
+                    <i className="fa fa-microphone"></i> Start
+                </button>
+                <button id="stop-button" class="button-xl" title="Stop Transcription" disabled="true"><i
+                        class="fa fa-stop-circle"></i> Stop
+                </button>
+                <button onClick={resetbutton} class="button-xl button-secondary" title="Clear Transcript"> 
+                    Clear Transcript
+                </button>
+            </div>
+        </div>
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+          <script src="dist/main.js"></script>
+
        {this.data}
       </div>
     );
   }
 }
 
-
-function App() {
-
-  return (
-    <div className="App"style = {{height:"100vh", justifyContent: 'center'}}>
-      {/*<button onClick={createNewTodo}>Add Todo</button>*/}
-
-      <div className="Message">
-      <TextLoop interval='4000' fade='true' children={["How can I help?", "	¿Cómo puedo ayudarte?",<img src={AWS_logo} alt="Logo" />]} />
-       </div>
-       {this.data}
-    </div>
-  );
-}
 
 export default LCD;
 

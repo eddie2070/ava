@@ -1,6 +1,6 @@
 .App {
   text-align: center;
-  background-color: #ff9900;
+  background-color: #252F3C;
 }
 
 .App-logo {
@@ -14,6 +14,7 @@
   }
 }
 
+
 @font-face {
     font-family: 'ember';
     src: url('./fonts/amazon_ember/AmazonEmber_Rg.ttf');
@@ -21,7 +22,7 @@
 
 .App-header {
   background-color: #282c34;
-  min-height: 100vh;
+  min-height: 200vh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -34,11 +35,39 @@
   color: #61dafb;
 }
 
+#start-button,
+#stop-button {
+    margin: 5px 0;
+}
+
 .Message {
   font-family: ember;
   color: white;
-  font-size: 65px;
+  font-size: 10.5vw;
   padding: 200px;
+  white-space: pre-wrap;
+}
+
+.Message-answer {
+  font-family: ember;
+  color: white;
+  font-size: 65px;
+  padding: 0px;
+  white-space: pre-wrap;
+}
+
+textarea {
+  width: 800px;
+  height: 70px;
+  font-family: ember;
+  font-size: 30px;
+  resize: none;
+  overflow-x: scroll;
+}
+
+#start-button,
+#stop-button {
+    margin: 5px 0;
 }
 
 @keyframes App-logo-spin {
