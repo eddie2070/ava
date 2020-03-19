@@ -10,6 +10,9 @@ import TextLoop from "react-text-loop";
 import cxs from "cxs/component";
 
 import { Textfit } from 'react-textfit';
+import OccamyText from 'react-occamy-text';
+
+import { Box,Grommet } from 'grommet';
 
 import mic from 'microphone-stream';
 import $ from 'jquery';
@@ -63,6 +66,17 @@ const StyledTextLoop = cxs(TextLoop)({
 });
 
 
+var pubSubsensoff = async () => {
+    await Amplify.PubSub.publish('lcd-message', { message: '', presence: 0 });
+}
+
+var sensoron = async () => {
+    await Amplify.PubSub.publish('lcd-message', { message: '', presence: 1 });
+}
+
+var messagesession = async () => {
+    await Amplify.PubSub.publish('lcd-message', { message: 'The session ML305 - How to become the leader in your DeepRacer league\n\r\b is located at the Aria - Pledingo323 room ', presence: "request" });
+}
 
 function SpeechToText(props) {
   const [response, setResponse] = useState("Question from attendee will be displayed here.")
@@ -200,6 +214,7 @@ class LCD extends React.Component {
 });
   }
 
+
   render(){
     const {datalcd, status, startbact} = this.state;
       const { loading } = this.state;
@@ -209,12 +224,16 @@ class LCD extends React.Component {
       <textarea id="transcript" placeholder="Real Time transcribe stream" rows="1"
       readonly="readonly"></textarea>
 
-      <div className="Message">
-      {(status === 0) ? <TextLoop interval='4000' fade='true' children={["ASK ME", <img src={AWS_logo} alt="Logo" />]} /> : null}
-      {(status === 1) ? "How can I help?" : null }
-      {(status === "request") ? <Textfit mode="single">{datalcd}</Textfit>  : null}
-       </div>
-       
+               <div className="occamy-text-example">
+                <div className="box">
+                      {(status === 0) ? <OccamyText maxFontSize='150'><h3><TextLoop interval='4000' fade='true' children={["ASK ME", <img src={AWS_logo} alt="Logo" />]} /></h3></OccamyText> : null}
+                      {(status === 1) ? <OccamyText><h3>My name is AVA.<br/>
+      How can I help?</h3></OccamyText> : null }
+                      {(status === "request") ? <OccamyText><h3>{datalcd}</h3></OccamyText>: null}
+                </div>
+              </div>
+          
+       {/* DEBUG SECTION
         <div class="row">
             <div class="col">
                 <button onClick={startbutton} class="button-xl" title="Start Transcription">
@@ -227,7 +246,19 @@ class LCD extends React.Component {
                     Clear Transcript
                 </button>
             </div>
-        </div>
+                        <div class="col">
+                <button onClick={pubSubsensoff} class="button-xl" title="Sensor clear">
+                    <i className="fa fa-microphone"></i> Sensor clear
+                </button>
+                <button onClick={sensoron} class="button-xl" title="Sensor prs detected"><i
+                        class="fa fa-stop-circle"></i> Sensor on
+                </button>
+                <button onClick={messagesession} class="button-xl button-secondary" title="Msg session"> 
+                    Msg session
+                </button>
+
+            </div>
+        </div>*/}
           <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
           <script src="dist/main.js"></script>
 
