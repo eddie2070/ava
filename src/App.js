@@ -12,6 +12,9 @@ import cxs from "cxs/component";
 import { Textfit } from 'react-textfit';
 import OccamyText from 'react-occamy-text';
 
+import Modal from 'react-awesome-modal';
+import IframeComponent from './lib/IframeComponent';
+
 import { Box,Grommet } from 'grommet';
 
 import mic from 'microphone-stream';
@@ -75,7 +78,11 @@ var sensoron = async () => {
 }
 
 var messagesession = async () => {
-    await Amplify.PubSub.publish('lcd-message', { message: 'The session ML305 - How to become the leader in your DeepRacer league\n\r\b is located at the Aria - Pledingo323 room ', presence: "request" });
+    await Amplify.PubSub.publish('lcd-message', { message: 'The session ML305 - How to become the leader in your DeepRacer league is located at the Aria - Pledingo323 room ', presence: "request" });
+}
+
+var messagemap = async () => {
+    await Amplify.PubSub.publish('lcd-message', { message: '', presence: 1, mapvue: 'true', mapurl: 'www.google.com' });
 }
 
 function SpeechToText(props) {
@@ -190,7 +197,9 @@ class LCD extends React.Component {
   state = {
     datalcd: null,
     status: 0,
-    startbact: ''
+    startbact: '',
+    visiblemap : false,
+    mapurl: null
   }
   
   componentDidMount() {
@@ -207,16 +216,31 @@ class LCD extends React.Component {
     console.log('tip: ', messageiot);
     var presenceiot = objectValue['value'].presence;
     console.log('status: ', presenceiot);
-    this.setState({datalcd: messageiot, status: presenceiot});
+    var mapdisplay = objectValue['value'].mapvue;
+    console.log('mapdisplay: ', mapdisplay)
+    var mapaddress = objectValue['value'].mapurl;
+    console.log('mapaddress: ', mapaddress);
+    this.setState({datalcd: messageiot, status: presenceiot, visiblemap: mapdisplay, mapurl: mapaddress});
   },
   error: error => console.error(error),
   close: () => console.log('Done'),
 });
   }
 
+    openModal() {
+        this.setState({
+            visible : true
+        });
+    }
+ 
+    closeModal() {
+        this.setState({
+            visiblemap : false
+        });
+    }
 
   render(){
-    const {datalcd, status, startbact} = this.state;
+    const {datalcd, status, startbact, visible} = this.state;
       const { loading } = this.state;
     const welcome = 'How can I help?';
     return (
@@ -224,16 +248,28 @@ class LCD extends React.Component {
       <textarea id="transcript" placeholder="Real Time transcribe stream" rows="1"
       readonly="readonly"></textarea>
 
+
                <div className="occamy-text-example">
                 <div className="box">
-                      {(status === 0) ? <OccamyText maxFontSize='150'><h3><TextLoop interval='4000' fade='true' children={["ASK ME", <img src={AWS_logo} alt="Logo" />]} /></h3></OccamyText> : null}
+                      {(status === 0) ? <OccamyText maxFontSize='150'><h3><TextLoop interval='4000' fade='true' children={["ASK ME", <img src={AWS_logo} alt="Logo" height="150%" width="150%" />]} /></h3></OccamyText> : null}
                       {(status === 1) ? <OccamyText><h3>My name is AVA.<br/>
       How can I help?</h3></OccamyText> : null }
                       {(status === "request") ? <OccamyText><h3>{datalcd}</h3></OccamyText>: null}
                 </div>
               </div>
+                            
+              <section>
+                <h1></h1>
+                <input type="button" value="Open" onClick={() => this.openModal()} />
+                <Modal visible={this.state.visiblemap} width="1200" height="600" effect="fadeInUp" onClickAway={() => this.closeModal()}>
+                    <div>
+                        <IframeComponent src="https://maps.mapwize.io/#/f/p/mgmmap1/room104/t/p/mgmmap1/dining_hall?k=f0b3b38e6081057f&u=default_universe&l=en&z=17.937&modeId=5e70d546cdd99a0016bc0a37" height="600" width="1200"/>
+                        <a href="javascript:void(0);" onClick={() => this.closeModal()}>Close</a>
+                    </div>
+                </Modal>
+            </section>
           
-       {/* DEBUG SECTION
+       {/* DEBUG SECTION*/}
         <div class="row">
             <div class="col">
                 <button onClick={startbutton} class="button-xl" title="Start Transcription">
@@ -256,9 +292,12 @@ class LCD extends React.Component {
                 <button onClick={messagesession} class="button-xl button-secondary" title="Msg session"> 
                     Msg session
                 </button>
+                <button onClick={messagemap} class="button-xl button-secondary" title="Msg map"> 
+                    Msg map
+                </button>
 
             </div>
-        </div>*/}
+        </div>
           <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
           <script src="dist/main.js"></script>
 
