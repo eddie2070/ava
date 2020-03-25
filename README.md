@@ -1,68 +1,125 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# AVA Project - LCD SCREEN
 
-## Available Scripts
+![alt text](https://github.com/eddie2070/ava/tree/master/img/20200323_091426.jpg "Logo Title Text 1")
+![alt text](https://github.com/eddie2070/ava/tree/master/img/20200323_091429.jpg "Logo Title Text 1")
+![alt text](https://github.com/eddie2070/ava/tree/master/img/20200323_091453.jpg "Logo Title Text 1")
 
-In the project directory, you can run:
 
-### `npm start`
+## Install
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+pi@raspberrypi:~ $ sudo apt-get install vim npm
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+### Deploy
+pi@raspberrypi:~ $ git clone https://github.com/eddie2070/ava.git
 
-### `npm test`
+### Auto start
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+pi@raspberrypi:~ $ cat /etc/rc.local
+```
+# By default this script does nothing.
 
-### `npm run build`
+cd /home/pi/ava/ava; /usr/bin/npm start
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+# Print the IP address
+_IP=$(hostname -I) || true
+if [ "$_IP" ]; then
+  printf "My IP address is %s\n" "$_IP"
+fi
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+exit 0
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+pi@raspberrypi:~ $ sudo cat /etc/xdg/lxsession/LXDE-pi/autostart
 
-### `npm run eject`
+```
+@lxpanel --profile LXDE-pi
+@pcmanfm --desktop --profile LXDE-pi
+#@xscreensaver -no-splash
+point-rpi
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+#Disable screensave
+@xset s noblank
+@xset s off
+@xset -dpms
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+@/usr/bin/chromium-browser --kiosk --ignore-certificate-errors --noerrors --disable-session-crashed-bubble --disable-infobars --disable-overlay-scrollbar --disable-restore-session-state --app=http://127.0.0.1:3000
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+### Screen HDMI configuration (if screen stays black)
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+pi@raspberrypi:~ $ sudo cat /boot/config.txt
+```
+# For more options and information see
+# http://rpf.io/configtxt
+# Some settings may impact device functionality. See link above for details
 
-## Learn More
+# uncomment if you get no picture on HDMI for a default "safe" mode
+#hdmi_safe=1
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+# uncomment this if your display has a black border of unused pixels visible
+# and your display can output without overscan
+#disable_overscan=1
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+# uncomment the following to adjust overscan. Use positive numbers if console
+# goes off screen, and negative if there is too much border
+#overscan_left=16
+#overscan_right=16
+#overscan_top=16
+#overscan_bottom=16
 
-### Code Splitting
+# uncomment to force a console size. By default it will be display's size minus
+# overscan.
+#framebuffer_width=1280
+#framebuffer_height=720
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
+# uncomment if hdmi display is not detected and composite is being output
+#hdmi_force_hotplug=1
+#ADDED EK
+hdmi_cvt=1024 600 60 3 0 0 0
 
-### Analyzing the Bundle Size
+# uncomment to force a specific HDMI mode (this will force VGA)
+#hdmi_group=1
+#hdmi_mode=1
+#ADDED
+hdmi_group=2
+hdmi_mode=87
+hdmi_drive=2
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
+# uncomment to force a HDMI mode rather than DVI. This can make audio work in
+# DMT (computer monitor) modes
+#hdmi_drive=2
 
-### Making a Progressive Web App
+# uncomment to increase signal to HDMI, if you have interference, blanking, or
+# no display
+#config_hdmi_boost=4
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
+# uncomment for composite PAL
+#sdtv_mode=2
 
-### Advanced Configuration
+#uncomment to overclock the arm. 700 MHz is the default.
+#arm_freq=800
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
+# Uncomment some or all of these to enable the optional hardware interfaces
+#dtparam=i2c_arm=on
+#dtparam=i2s=on
+#dtparam=spi=on
 
-### Deployment
+# Uncomment this to enable the lirc-rpi module
+#dtoverlay=lirc-rpi
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
+# Additional overlays and parameters are documented /boot/overlays/README
 
-### `npm run build` fails to minify
+# Enable audio (loads snd_bcm2835)
+dtparam=audio=on
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+[pi4]
+# Enable DRM VC4 V3D driver on top of the dispmanx display stack
+dtoverlay=vc4-fkms-v3d
+max_framebuffers=2
+
+[all]
+#dtoverlay=vc4-fkms-v3d
+
+# NOOBS Auto-generated Settings:
+hdmi_force_hotplug=1
+```

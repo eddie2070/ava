@@ -260,16 +260,17 @@ class LCD extends React.Component {
                             
               <section>
                 <h1></h1>
-                <input type="button" value="Open" onClick={() => this.openModal()} />
+                
                 <Modal visible={this.state.visiblemap} width="1200" height="600" effect="fadeInUp" onClickAway={() => this.closeModal()}>
                     <div>
-                        <IframeComponent src="https://maps.mapwize.io/#/f/p/mgmmap1/room104/t/p/mgmmap1/dining_hall?k=f0b3b38e6081057f&u=default_universe&l=en&z=17.937&modeId=5e70d546cdd99a0016bc0a37" height="600" width="1200"/>
+                        <IframeComponent src="https://maps.mapwize.io/#/f/p/mgmmap1/room104/t/p/mgmmap1/dining_hall?z=18&k=f0b3b38e6081057f&u=default_universe&l=en&modeId=5e70d546cdd99a0016bc0a37&menu=false&follow=true" height="600" width="1200"/>
                         <a href="javascript:void(0);" onClick={() => this.closeModal()}>Close</a>
                     </div>
                 </Modal>
             </section>
           
-       {/* DEBUG SECTION*/}
+       {/* DEBUG SECTION
+       <input type="button" value="Open" onClick={() => this.openModal()} />
         <div class="row">
             <div class="col">
                 <button onClick={startbutton} class="button-xl" title="Start Transcription">
@@ -297,7 +298,7 @@ class LCD extends React.Component {
                 </button>
 
             </div>
-        </div>
+        </div>*/}
           <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
           <script src="dist/main.js"></script>
 
