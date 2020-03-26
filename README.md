@@ -1,8 +1,8 @@
 # AVA Project - LCD SCREEN
 
 <img src="https://github.com/eddie2070/ava/blob/master/img/20200323_091426.jpg"/>
-<img src="https://github.com/eddie2070/ava/tree/master/img/20200323_091429.jpg"/>
-<img src="https://github.com/eddie2070/ava/tree/master/img/20200323_091453.jpg"/>
+<img src="https://github.com/eddie2070/ava/blob/master/img/20200323_091429.jpg"/>
+<img src="https://github.com/eddie2070/ava/blob/master/img/20200323_091453.jpg"/>
 
 
 ## Install
