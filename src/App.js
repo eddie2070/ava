@@ -22,6 +22,7 @@ import $ from 'jquery';
 import streamAudioToWebSocket from  "./lib/main.js";
 import showError from  "./lib/main.js";
 import { startbutton } from "./lib/main.js";
+import { stopbutton } from "./lib/main.js";
 import { resetbutton } from "./lib/main.js";
 
 
@@ -85,112 +86,7 @@ var messagemap = async () => {
     await Amplify.PubSub.publish('lcd-message', { message: '', presence: 1, mapvue: 'true', mapurl: 'www.google.com' });
 }
 
-function SpeechToText(props) {
-  const [response, setResponse] = useState("Question from attendee will be displayed here.")
-  
-  function AudioRecorder(props) {
-    const [recording, setRecording] = useState(false);
-    const [micStream, setMicStream] = useState();
-    const [audioBuffer] = useState(
-      (function() {
-        let buffer = [];
-        function add(raw) {
-          buffer = buffer.concat(...raw);
-          return buffer;
-        }
-        function newBuffer() {
-          console.log("reseting buffer");
-          buffer = [];
-        }
- 
-        return {
-          reset: function() {
-            newBuffer();
-          },
-          addData: function(raw) {
-            return add(raw);
-          },
-          getData: function() {
-            return buffer;
-          }
-        };
-      })()
-    );
 
-    async function startRecording() {
-      console.log('start recording');
-      audioBuffer.reset();
-
-      window.navigator.mediaDevices.getUserMedia({ video: false, audio: true }).then((stream) => {
-        const startMic = new mic();
-
-        startMic.setStream(stream);
-        startMic.on('data', (chunk) => {
-          var raw = mic.toRaw(chunk);
-          if (raw == null) {
-            return;
-          }
-          var audiobuf = audioBuffer.addData(raw);
-
-        });
-        
-        setRecording(true);
-        setMicStream(startMic);
-      });
-    }
-
-    async function stopRecording() {
-      console.log('stop recording');
-      const { finishRecording } = props;
-
-      micStream.stop();
-      setMicStream(null);
-      setRecording(false);
-
-      const resultBuffer = audioBuffer.getData();
-
-      if (typeof finishRecording === "function") {
-        finishRecording(resultBuffer);
-      }
-
-    }
-
-    return (
-      <div className="audioRecorder">
-        <div>
-          {recording && <button onClick={stopRecording}>Stop recording</button>}
-          {!recording && <button onClick={startRecording}>Start recording</button>}
-        </div>
-      </div>
-    );
-  }
-
-  function convertFromBuffer(bytes) {
-    setResponse('Converting text...');
-    
-    Predictions.convert({
-      transcription: {
-        source: {
-          bytes
-        },
-        // language: "en-US", // other options are "en-GB", "fr-FR", "fr-CA", "es-US"
-      },
-    }).then(({ transcription: { fullText } }) => {
-        setResponse(fullText);
-        console.log(fullText);
-          })
-      .catch(err => setResponse(JSON.stringify(err, null, 2)));
-  }
-
-  return (
-    <div className="Text">
-      <div>
-        <AudioRecorder finishRecording={convertFromBuffer} />
-        <p>{response}</p>
-      </div>
-    </div>
-  );
-}
 
 
 class LCD extends React.Component {
@@ -199,7 +95,8 @@ class LCD extends React.Component {
     status: 0,
     startbact: '',
     visiblemap : false,
-    mapurl: null
+    mapurl: null,
+    micstatus: 0
   }
   
   componentDidMount() {
@@ -220,7 +117,9 @@ class LCD extends React.Component {
     console.log('mapdisplay: ', mapdisplay)
     var mapaddress = objectValue['value'].mapurl;
     console.log('mapaddress: ', mapaddress);
-    this.setState({datalcd: messageiot, status: presenceiot, visiblemap: mapdisplay, mapurl: mapaddress});
+    var micopen = objectValue['value'].micstatus;
+    console.log('micopen: ', micopen);
+    this.setState({datalcd: messageiot, status: presenceiot, visiblemap: mapdisplay, mapurl: mapaddress, micstatus: micopen});
   },
   error: error => console.error(error),
   close: () => console.log('Done'),
@@ -240,7 +139,7 @@ class LCD extends React.Component {
     }
 
   render(){
-    const {datalcd, status, startbact, visible} = this.state;
+    const {datalcd, status, startbact, visible, micstatus} = this.state;
       const { loading } = this.state;
     const welcome = 'How can I help?';
     return (
@@ -268,15 +167,18 @@ class LCD extends React.Component {
                     </div>
                 </Modal>
             </section>
+            
+           {(micstatus === 1) ? startbutton(): null }
+           
           
-       {/* DEBUG SECTION
+       {/* DEBUG SECTION*/}
        <input type="button" value="Open" onClick={() => this.openModal()} />
         <div class="row">
             <div class="col">
                 <button onClick={startbutton} class="button-xl" title="Start Transcription">
                     <i className="fa fa-microphone"></i> Start
                 </button>
-                <button id="stop-button" class="button-xl" title="Stop Transcription" disabled="true"><i
+                <button onClick={stopbutton} class="button-xl" title="Stop Transcription"><i
                         class="fa fa-stop-circle"></i> Stop
                 </button>
                 <button onClick={resetbutton} class="button-xl button-secondary" title="Clear Transcript"> 
@@ -298,7 +200,7 @@ class LCD extends React.Component {
                 </button>
 
             </div>
-        </div>*/}
+        </div>
           <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
           <script src="dist/main.js"></script>
 

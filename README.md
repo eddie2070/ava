@@ -4,6 +4,7 @@
 <img src="https://github.com/eddie2070/ava/blob/master/img/20200323_091429.jpg"/>
 <img src="https://github.com/eddie2070/ava/blob/master/img/20200323_091453.jpg"/>
 
+Hardware is a Sunfounder 10.1-inch IPS LCD Monitor for Raspberry Pi.
 
 ## Install
 

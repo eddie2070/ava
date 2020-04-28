@@ -5,10 +5,12 @@ const marshaller        = require("@aws-sdk/eventstream-marshaller"); // for con
 const util_utf8_node    = require("@aws-sdk/util-utf8-node"); // utilities for encoding and decoding UTF8
 const mic               = require('microphone-stream'); // collect microphone input as a stream of raw bytes
 const $                 = require('jquery');
+const AWS                 = require('aws-sdk');
 
 // our converter between binary event streams messages and JSON
 const eventStreamMarshaller = new marshaller.EventStreamMarshaller(util_utf8_node.toUtf8, util_utf8_node.fromUtf8);
-
+var lexruntime = new AWS.LexRuntime();
+    
 // our global variables for managing state
 let languageCode;
 let region;
@@ -18,6 +20,7 @@ let socket;
 let micStream;
 let socketError = false;
 let transcribeException = false;
+
 
 
 // check to see if the browser allows mic access
@@ -48,13 +51,36 @@ if (!window.navigator.mediaDevices.getUserMedia) {
         streamAudioToWebSocket();
 };
 
+//LEX INIT
+var stl = function sendToLex(message) {
+
+
+    var params = {
+        botAlias: 'dev', /* required, has to be '$LATEST' */
+        botName: 'CoffeeBot', /* required, the name of you bot */
+        inputText: message, /* required, your text */
+        userId: 'USER', /* required, arbitrary identifier */
+    }
+
+    lexruntime.postText(params, (err, data) => {
+            if(err) {
+                // TODO SHOW ERROR ON MESSAGES
+            }
+            if (data) {
+                this.showResponse(data)
+            }
+        })
+}
+
+//LEX END INIT
+
 let streamAudioToWebSocket = function (userMediaStream) {
     //let's get the mic input from the browser, via the microphone-stream module
-    console.log("streamAudioToWebSocket");
+    //console.log("streamAudioToWebSocket");
     window.navigator.mediaDevices.getUserMedia({ video: false, audio: true }).then((stream) => {
     micStream = new mic();
     micStream.setStream(stream);
-    console.log("buttontest2");
+    //console.log("buttontest2");
 
     // Pre-signed URLs are a way to authenticate a request (or WebSocket connection, in this case)
     // via Query Parameters. Learn more: https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-query-string-auth.html
@@ -62,22 +88,22 @@ let streamAudioToWebSocket = function (userMediaStream) {
 
     //open up our WebSocket connection
         socket = new WebSocket(url);
-    console.log("socket return: ", socket);
+    //console.log("socket return: ", socket);
     socket.binaryType = "arraybuffer";
 
     // when we get audio data from the mic, send it to the WebSocket if possible
     socket.onopen = function() {
-        console.log("micstream.on test2a");
+        //console.log("micstream.on test2a");
         micStream.on('data', (chunk) => {
-          console.log("micstream.on test2b");
+          //console.log("micstream.on test2b");
           var raw = mic.toRaw(chunk);
-          console.log("micstream.on test3");
+          //console.log("micstream.on test3");
           if (raw == null) {
             return;
           }
         console.log("binary1: ");
           var binary = convertAudioToBinaryMessage(raw);
-          console.log("binary2: ", binary);
+          //console.log("binary2: ", binary);
             
                 if (socket.OPEN) {
                 console.log("socket");
@@ -101,7 +127,7 @@ let streamAudioToWebSocket = function (userMediaStream) {
     };
     
         socket.onclose = function (closeEvent) {
-        console.log("micStream.stop: ", closeEvent);
+        //console.log("micStream.stop: ", closeEvent);
         micStream.stop();
         }
 
@@ -125,17 +151,17 @@ function setRegion() {
 }
 
 function wireSocketEvents() {
-    console.log("wiresocketEvent test");
+    //console.log("wiresocketEvent test");
     // handle inbound messages from Amazon Transcribe
     socket.onmessage = function (message) {
         //convert the binary event stream message to JSON
-        console.log("message.data :", message.data);
+        //console.log("message.data :", message.data);
         let messageWrapper = eventStreamMarshaller.unmarshall(Buffer(message.data));
-        console.log("messageWrapper", messageWrapper);
+        //console.log("messageWrapper", messageWrapper);
         let messageBody = JSON.parse(String.fromCharCode.apply(String, messageWrapper.body));
-        console.log("headers: ", messageWrapper.headers[":message-type"].value);
+        //console.log("headers: ", messageWrapper.headers[":message-type"].value);
         if (messageWrapper.headers[":message-type"].value === "event") {
-            console.log("messageWrapper.headers");
+            //console.log("messageWrapper.headers");
             handleEventStreamMessage(messageBody);
         }
         else {
@@ -170,12 +196,14 @@ function wireSocketEvents() {
 let handleEventStreamMessage = function (messageJson) {
     let results = messageJson.Transcript.Results;
 
+
     if (results.length > 0) {
         if (results[0].Alternatives.length > 0) {
             let transcript = results[0].Alternatives[0].Transcript;
 
             // fix encoding for accented characters
             transcript = decodeURIComponent(escape(transcript));
+            console.log('transcript: ', transcript);
 
             // update the textarea with the latest result
             $('#transcript').val(transcription + transcript + "\n");
@@ -183,6 +211,11 @@ let handleEventStreamMessage = function (messageJson) {
             // if this transcript segment is final, add it to the overall transcription
             if (!results[0].IsPartial) {
                 //scroll the textarea down
+                console.log('transcript[0]:', results[0]);
+                //HERE TO SEND TO LEX
+                closeSocket();
+                stl(results[0]);
+                
                 $('#transcript').scrollTop($('#transcript')[0].scrollHeight);
 
                 transcription += transcript + "\n";
@@ -200,12 +233,13 @@ let closeSocket = function () {
         let emptyBuffer = eventStreamMarshaller.marshall(emptyMessage);
         socket.send(emptyBuffer);
     }
+    else console.log('already closed');
 }
 
-$('#stop-button').click(function () {
+export function stopbutton () {
     closeSocket();
     toggleStartStop();
-});
+};
 
 export function resetbutton () {
     $('#transcript').val('');
@@ -238,10 +272,11 @@ function convertAudioToBinaryMessage(audioChunk) {
 
     // add the right JSON headers and structure to the message
     let audioEventMessage = getAudioEventMessage(Buffer.from(pcmEncodedBuffer));
+    //console.log('audioeventmessage: ', audioEventMessage);
 
     //convert the JSON object + headers into a binary event stream message
     let binary = eventStreamMarshaller.marshall(audioEventMessage);
-    console.log("binary :", binary);
+    //console.log("binary :", binary);
     return binary;
 }
 
